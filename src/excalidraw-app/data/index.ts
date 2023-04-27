@@ -26,6 +26,8 @@ import {
 import { encodeFilesForUpload } from "./FileManager";
 import { saveFilesToFirebase } from "./firebase";
 
+
+
 export type SyncableExcalidrawElement = ExcalidrawElement & {
   _brand: "SyncableExcalidrawElement";
 };
@@ -144,7 +146,8 @@ export const isCollaborationLink = (link: string) => {
 export const getCollaborationLinkData = (link: string) => {
   const hash = new URL(link).hash;
   const match = hash.match(RE_COLLAB_LINK);
-  if (match && match[2].length !== 22) {
+  // if (match && match[2].length !== 22) {
+  if (match && match[2].length < 2) {
     window.alert(t("alerts.invalidEncryptionKey"));
     return null;
   }

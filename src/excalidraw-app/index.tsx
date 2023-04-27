@@ -87,6 +87,10 @@ import { appJotaiStore } from "./app-jotai";
 import "./index.scss";
 import { ResolutionType } from "../utility-types";
 
+import VConsole from "vconsole";
+
+let vconsole = new VConsole();
+
 polyfill();
 
 window.EXCALIDRAW_THROTTLE_RENDER = true;
@@ -107,6 +111,7 @@ const initializeScene = async (opts: {
 > => {
   const searchParams = new URLSearchParams(window.location.search);
   const id = searchParams.get("id");
+  const username = searchParams.get("username");
   const jsonBackendMatch = window.location.hash.match(
     /^#json=([a-zA-Z0-9_-]+),([a-zA-Z0-9_-]+)$/,
   );
@@ -184,6 +189,10 @@ const initializeScene = async (opts: {
 
   if (roomLinkData) {
     const { excalidrawAPI } = opts;
+
+    if(username){
+      opts.collabAPI.setUsername(username);
+    }
 
     const scene = await opts.collabAPI.startCollaboration(roomLinkData);
 
