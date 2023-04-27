@@ -39,7 +39,7 @@ export const AppWelcomeScreen: React.FC<{
       <WelcomeScreen.Hints.ToolbarHint />
       <WelcomeScreen.Hints.HelpHint />
       <WelcomeScreen.Center>
-        <WelcomeScreen.Center.Logo />
+        {/*<WelcomeScreen.Center.Logo />*/}
         <WelcomeScreen.Center.Heading>
           {headingContent}
         </WelcomeScreen.Center.Heading>
@@ -49,15 +49,15 @@ export const AppWelcomeScreen: React.FC<{
           <WelcomeScreen.Center.MenuItemLiveCollaborationTrigger
             onSelect={() => props.setCollabDialogShown(true)}
           />
-          {!isExcalidrawPlusSignedUser && (
-            <WelcomeScreen.Center.MenuItemLink
-              href="https://plus.excalidraw.com/plus?utm_source=excalidraw&utm_medium=app&utm_content=welcomeScreenGuest"
-              shortcut={null}
-              icon={PlusPromoIcon}
-            >
-              Try Excalidraw Plus!
-            </WelcomeScreen.Center.MenuItemLink>
-          )}
+          {/*{!isExcalidrawPlusSignedUser && (*/}
+          {/*  <WelcomeScreen.Center.MenuItemLink*/}
+          {/*    href="https://plus.excalidraw.com/plus?utm_source=excalidraw&utm_medium=app&utm_content=welcomeScreenGuest"*/}
+          {/*    shortcut={null}*/}
+          {/*    icon={PlusPromoIcon}*/}
+          {/*  >*/}
+          {/*    Try Excalidraw Plus!*/}
+          {/*  </WelcomeScreen.Center.MenuItemLink>*/}
+          {/*)}*/}
         </WelcomeScreen.Center.Menu>
       </WelcomeScreen.Center>
     </WelcomeScreen>
