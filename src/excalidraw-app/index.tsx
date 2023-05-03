@@ -625,7 +625,7 @@ const ExcalidrawWrapper = () => {
         initialData={initialStatePromiseRef.current.promise}
         isCollaborating={isCollaborating}
         onPointerUpdate={collabAPI?.onPointerUpdate}
-        zenModeEnabled={true}
+        zenModeEnabled={false}
         UIOptions={{
           canvasActions: {
             toggleTheme: true,
