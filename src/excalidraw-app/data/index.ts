@@ -1,31 +1,30 @@
-import { compressData, decompressData } from "../../data/encode";
+import {compressData, decompressData} from "../../data/encode";
 import {
   decryptData,
   generateEncryptionKey,
   IV_LENGTH_BYTES,
 } from "../../data/encryption";
-import { serializeAsJSON } from "../../data/json";
-import { restore } from "../../data/restore";
-import { ImportedDataState } from "../../data/types";
-import { isInvisiblySmallElement } from "../../element/sizeHelpers";
-import { isInitializedImageElement } from "../../element/typeChecks";
-import { ExcalidrawElement, FileId } from "../../element/types";
-import { t } from "../../i18n";
+import {serializeAsJSON} from "../../data/json";
+import {restore} from "../../data/restore";
+import {ImportedDataState} from "../../data/types";
+import {isInvisiblySmallElement} from "../../element/sizeHelpers";
+import {isInitializedImageElement} from "../../element/typeChecks";
+import {ExcalidrawElement, FileId} from "../../element/types";
+import {t} from "../../i18n";
 import {
   AppState,
   BinaryFileData,
   BinaryFiles,
   UserIdleState,
 } from "../../types";
-import { bytesToHexString } from "../../utils";
+import {bytesToHexString} from "../../utils";
 import {
   DELETED_ELEMENT_TIMEOUT,
   FILE_UPLOAD_MAX_BYTES,
   ROOM_ID_BYTES,
 } from "../app_constants";
-import { encodeFilesForUpload } from "./FileManager";
-import { saveFilesToFirebase } from "./firebase";
-
+import {encodeFilesForUpload} from "./FileManager";
+import {saveFilesToFirebase} from "./firebase";
 
 
 export type SyncableExcalidrawElement = ExcalidrawElement & {
@@ -74,17 +73,23 @@ export const getCollabServer = async (): Promise<{
       url: process.env.REACT_APP_WS_SERVER_URL,
       polling: true,
     };
+  } else
+    alert("协作服务器地址异常，请联系管理员！");
+    return {
+    url: "",
+    polling: false
   }
 
-  try {
-    const resp = await fetch(
-      `${process.env.REACT_APP_PORTAL_URL}/collab-server`,
-    );
-    return await resp.json();
-  } catch (error) {
-    console.error(error);
-    throw new Error(t("errors.cannotResolveCollabServer"));
-  }
+  //modified by ideniden
+  // try {
+  //   const resp = await fetch(
+  //     `${process.env.REACT_APP_PORTAL_URL}/collab-server`,
+  //   );
+  //   return await resp.json();
+  // } catch (error) {
+  //   console.error(error);
+  //   throw new Error(t("errors.cannotResolveCollabServer"));
+  // }
 };
 
 export type EncryptedData = {
@@ -128,13 +133,13 @@ export type SocketUpdateDataSource = {
 export type SocketUpdateDataIncoming =
   | SocketUpdateDataSource[keyof SocketUpdateDataSource]
   | {
-      type: "INVALID_RESPONSE";
-    };
+  type: "INVALID_RESPONSE";
+};
 
 export type SocketUpdateData =
   SocketUpdateDataSource[keyof SocketUpdateDataSource] & {
-    _brand: "socketUpdateData";
-  };
+  _brand: "socketUpdateData";
+};
 
 const RE_COLLAB_LINK = /^#room=([a-zA-Z0-9_-]+),([a-zA-Z0-9_-]+)$/;
 
@@ -151,7 +156,7 @@ export const getCollaborationLinkData = (link: string) => {
     window.alert(t("alerts.invalidEncryptionKey"));
     return null;
   }
-  return match ? { roomId: match[1], roomKey: match[2] } : null;
+  return match ? {roomId: match[1], roomKey: match[2]} : null;
 };
 
 export const generateCollaborationLinkData = async () => {
@@ -162,7 +167,7 @@ export const generateCollaborationLinkData = async () => {
     throw new Error("Couldn't generate room key");
   }
 
-  return { roomId, roomKey };
+  return {roomId, roomKey};
 };
 
 export const getCollaborationLink = (data: {
@@ -177,9 +182,9 @@ export const getCollaborationLink = (data: {
  * @deprecated
  */
 const legacy_decodeFromBackend = async ({
-  buffer,
-  decryptionKey,
-}: {
+                                          buffer,
+                                          decryptionKey,
+                                        }: {
   buffer: ArrayBuffer;
   decryptionKey: string;
 }) => {
@@ -222,7 +227,7 @@ const importFromBackend = async (
     const buffer = await response.arrayBuffer();
 
     try {
-      const { data: decodedBuffer } = await decompressData(
+      const {data: decodedBuffer} = await decompressData(
         new Uint8Array(buffer),
         {
           decryptionKey,
@@ -241,7 +246,7 @@ const importFromBackend = async (
         "error when decoding shareLink data using the new format:",
         error,
       );
-      return legacy_decodeFromBackend({ buffer, decryptionKey });
+      return legacy_decodeFromBackend({buffer, decryptionKey});
     }
   } catch (error: any) {
     window.alert(t("alerts.importBackendFailed"));
@@ -266,7 +271,7 @@ export const loadScene = async (
       await importFromBackend(id, privateKey),
       localDataState?.appState,
       localDataState?.elements,
-      { repairBindings: true, refreshDimensions: true },
+      {repairBindings: true, refreshDimensions: true},
     );
   } else {
     data = restore(localDataState || null, null, null, {
@@ -296,7 +301,7 @@ export const exportToBackend = async (
     new TextEncoder().encode(
       serializeAsJSON(elements, appState, files, "database"),
     ),
-    { encryptionKey },
+    {encryptionKey},
   );
 
   try {

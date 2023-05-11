@@ -36,11 +36,11 @@ import {
   SyncableExcalidrawElement,
 } from "../data";
 import {
-  isSavedToFirebase,
+  isSavedToDatabase,
   loadFilesFromFirebase,
   loadFromFirebase,
   saveFilesToFirebase,
-  saveToFirebase,
+  saveToDatabase,
 } from "../data/firebase";
 import {
   importUsernameFromLocalStorage,
@@ -226,7 +226,7 @@ class Collab extends PureComponent<Props, CollabState> {
     if (
       this.isCollaborating() &&
       (this.fileManager.shouldPreventUnload(syncableElements) ||
-        !isSavedToFirebase(this.portal, syncableElements))
+        !isSavedToDatabase(this.portal, syncableElements))
     ) {
       // this won't run in time if user decides to leave the site, but
       //  the purpose is to run in immediately after user decides to stay
@@ -240,7 +240,7 @@ class Collab extends PureComponent<Props, CollabState> {
     syncableElements: readonly SyncableExcalidrawElement[],
   ) => {
     try {
-      const savedData = await saveToFirebase(
+      const savedData = await saveToDatabase(
         this.portal,
         syncableElements,
         this.excalidrawAPI.getAppState(),

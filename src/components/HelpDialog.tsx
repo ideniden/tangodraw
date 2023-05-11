@@ -12,31 +12,31 @@ const Header = () => (
   <div className="HelpDialog__header">
     <a
       className="HelpDialog__btn"
-      href="https://github.com/excalidraw/excalidraw#documentation"
+      href="https://support.lssvc.cn/#/doc_client/whiteboard"
       target="_blank"
       rel="noopener noreferrer"
     >
-      {t("helpDialog.documentation")}
+      {"help"}
       <div className="HelpDialog__link-icon">{ExternalLinkIcon}</div>
     </a>
-    <a
-      className="HelpDialog__btn"
-      href="https://blog.excalidraw.com"
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      {t("helpDialog.blog")}
-      <div className="HelpDialog__link-icon">{ExternalLinkIcon}</div>
-    </a>
-    <a
-      className="HelpDialog__btn"
-      href="https://github.com/excalidraw/excalidraw/issues"
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      {t("helpDialog.github")}
-      <div className="HelpDialog__link-icon">{ExternalLinkIcon}</div>
-    </a>
+    {/*<a*/}
+    {/*  className="HelpDialog__btn"*/}
+    {/*  href="https://blog.excalidraw.com"*/}
+    {/*  target="_blank"*/}
+    {/*  rel="noopener noreferrer"*/}
+    {/*>*/}
+    {/*  {t("helpDialog.blog")}*/}
+    {/*  <div className="HelpDialog__link-icon">{ExternalLinkIcon}</div>*/}
+    {/*</a>*/}
+    {/*<a*/}
+    {/*  className="HelpDialog__btn"*/}
+    {/*  href="https://github.com/excalidraw/excalidraw/issues"*/}
+    {/*  target="_blank"*/}
+    {/*  rel="noopener noreferrer"*/}
+    {/*>*/}
+    {/*  {t("helpDialog.github")}*/}
+    {/*  <div className="HelpDialog__link-icon">{ExternalLinkIcon}</div>*/}
+    {/*</a>*/}
   </div>
 );
 

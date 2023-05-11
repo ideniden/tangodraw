@@ -324,8 +324,8 @@ const LayerUI = ({
           >
             <UserList collaborators={appState.collaborators} />
             {renderTopRightUI?.(device.isMobile, appState)}
-            {!appState.viewModeEnabled && (
-              <LibraryButton appState={appState} setAppState={setAppState} />
+            {!appState.viewModeEnabled && (<a/>
+              // <LibraryButton appState={appState} setAppState={setAppState} />
             )}
           </div>
         </div>
@@ -337,14 +337,15 @@ const LayerUI = ({
     return appState.openSidebar === "customSidebar" ? (
       renderCustomSidebar?.() || null
     ) : appState.openSidebar === "library" ? (
-      <LibraryMenu
-        appState={appState}
-        onInsertElements={onInsertElements}
-        libraryReturnUrl={libraryReturnUrl}
-        focusContainer={focusContainer}
-        library={library}
-        id={id}
-      />
+      <a/>
+      // <LibraryMenu
+      //   appState={appState}
+      //   onInsertElements={onInsertElements}
+      //   libraryReturnUrl={libraryReturnUrl}
+      //   focusContainer={focusContainer}
+      //   library={library}
+      //   id={id}
+      // />
     ) : null;
   };
 
