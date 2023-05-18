@@ -22,19 +22,20 @@ export enum WS_SCENE_EVENT_TYPES {
   UPDATE = "SCENE_UPDATE",
 }
 
-export const FIREBASE_STORAGE_PREFIXES = {
+export const DATABASE_STORAGE_PREFIXES = {
   shareLinkFiles: `/files/shareLinks`,
+  collabBucket: `image`,
   collabFiles: `/files/rooms`,
 };
 
 export const ROOM_ID_BYTES = 10;
 
 export const STORAGE_KEYS = {
-  LOCAL_STORAGE_ELEMENTS: "excalidraw",
-  LOCAL_STORAGE_APP_STATE: "excalidraw-state",
-  LOCAL_STORAGE_COLLAB: "excalidraw-collab",
-  LOCAL_STORAGE_LIBRARY: "excalidraw-library",
-  LOCAL_STORAGE_THEME: "excalidraw-theme",
+  LOCAL_STORAGE_ELEMENTS: "tangodraw",
+  LOCAL_STORAGE_APP_STATE: "tangodraw-state",
+  LOCAL_STORAGE_COLLAB: "tangodraw-collab",
+  LOCAL_STORAGE_LIBRARY: "tangodraw-library",
+  LOCAL_STORAGE_THEME: "tangodraw-theme",
   VERSION_DATA_STATE: "version-dataState",
   VERSION_FILES: "version-files",
 } as const;

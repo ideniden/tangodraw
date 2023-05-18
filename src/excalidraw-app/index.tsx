@@ -43,7 +43,7 @@ import {
   resolvablePromise,
 } from "../utils";
 import {
-  FIREBASE_STORAGE_PREFIXES,
+  DATABASE_STORAGE_PREFIXES,
   STORAGE_KEYS,
   SYNC_BROWSER_TABS_TIMEOUT,
 } from "./app_constants";
@@ -67,11 +67,10 @@ import {
 } from "./data/localStorage";
 import CustomStats from "./CustomStats";
 import {restore, restoreAppState, RestoredDataState} from "../data/restore";
-import {ExportToExcalidrawPlus} from "./components/ExportToExcalidrawPlus";
 import {updateStaleImageStatuses} from "./data/FileManager";
 import {newElementWith} from "../element/mutateElement";
 import {isInitializedImageElement} from "../element/typeChecks";
-import {loadFilesFromFirebase} from "./data/firebase";
+import {loadFilesFromDatabase} from "./data/firebase";
 import {LocalData} from "./data/LocalData";
 import {isBrowserStorageStateNewer} from "./data/tabSync";
 import clsx from "clsx";
@@ -324,8 +323,8 @@ const ExcalidrawWrapper = () => {
           }, [] as FileId[]) || [];
 
         if (data.isExternalScene) {
-          loadFilesFromFirebase(
-            `${FIREBASE_STORAGE_PREFIXES.shareLinkFiles}/${data.id}`,
+          loadFilesFromDatabase(
+            `${DATABASE_STORAGE_PREFIXES.shareLinkFiles}/${data.id}`,
             data.key,
             fileIds,
           ).then(({loadedFiles, erroredFiles}) => {

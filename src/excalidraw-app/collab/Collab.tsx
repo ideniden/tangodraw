@@ -21,7 +21,7 @@ import {
 import {
   CURSOR_SYNC_TIMEOUT,
   FILE_UPLOAD_MAX_BYTES,
-  FIREBASE_STORAGE_PREFIXES,
+  DATABASE_STORAGE_PREFIXES,
   INITIAL_SCENE_UPDATE_TIMEOUT,
   LOAD_IMAGES_TIMEOUT,
   WS_SCENE_EVENT_TYPES,
@@ -37,9 +37,9 @@ import {
 } from "../data";
 import {
   isSavedToDatabase,
-  loadFilesFromFirebase,
-  loadFromFirebase,
-  saveFilesToFirebase,
+  loadFilesFromDatabase,
+  loadFromDatabase,
+  saveFilesToDatabase,
   saveToDatabase,
 } from "../data/firebase";
 import {
@@ -128,7 +128,7 @@ class Collab extends PureComponent<Props, CollabState> {
           throw new AbortError();
         }
 
-        return loadFilesFromFirebase(`files/rooms/${roomId}`, roomKey, fileIds);
+        return loadFilesFromDatabase(`files/rooms/${roomId}`, roomKey, fileIds);
       },
       saveFiles: async ({ addedFiles }) => {
         const { roomId, roomKey } = this.portal;
@@ -136,8 +136,8 @@ class Collab extends PureComponent<Props, CollabState> {
           throw new AbortError();
         }
 
-        return saveFilesToFirebase({
-          prefix: `${FIREBASE_STORAGE_PREFIXES.collabFiles}/${roomId}`,
+        return saveFilesToDatabase({
+          prefix: `${DATABASE_STORAGE_PREFIXES.collabFiles}/${roomId}`,
           files: await encodeFilesForUpload({
             files: addedFiles,
             encryptionKey: roomKey,
@@ -577,7 +577,7 @@ class Collab extends PureComponent<Props, CollabState> {
       this.excalidrawAPI.resetScene();
 
       try {
-        const elements = await loadFromFirebase(
+        const elements = await loadFromDatabase(
           roomLinkData.roomId,
           roomLinkData.roomKey,
           this.portal.socket,

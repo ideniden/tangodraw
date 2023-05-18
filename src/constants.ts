@@ -119,6 +119,7 @@ export const IMAGE_MIME_TYPES = {
 
 export const MIME_TYPES = {
   json: "application/json",
+  tangodraw:"application/vnd.tangodraw+json",
   // excalidraw data
   excalidraw: "application/vnd.excalidraw+json",
   excalidrawlib: "application/vnd.excalidrawlib+json",

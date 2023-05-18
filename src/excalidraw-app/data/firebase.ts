@@ -8,102 +8,25 @@ import {
   BinaryFileMetadata,
   DataURL,
 } from "../../types";
-import {FILE_CACHE_MAX_AGE_SEC} from "../app_constants";
+import {DATABASE_STORAGE_PREFIXES, FILE_CACHE_MAX_AGE_SEC} from "../app_constants";
 import {decompressData} from "../../data/encode";
 import {encryptData, decryptData} from "../../data/encryption";
 import {MIME_TYPES} from "../../constants";
 import {reconcileElements} from "../collab/reconciliation";
 import {getSyncableElements, SyncableExcalidrawElement} from ".";
-import {ResolutionType} from "../../utility-types";
 import {createClient} from '@supabase/supabase-js';
 // private
 // -----------------------------------------------------------------------------
 
-const supabaseUrl = "http://localhost:8000"
-const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.ewogICAgInJvbGUiOiAic2VydmljZV9yb2xlIiwKICAgICJpc3MiOiAic3VwYWJhc2UiLAogICAgImlhdCI6IDE2ODM2NDgwMDAsCiAgICAiZXhwIjogMTg0MTUwMDgwMAp9.46oxN_imo5vXvvGutXMGova9-rYBCxbkkQl4_-Vm9Ek"
-const supabaseBucket = "image"
+const supabaseUrl = process.env.REACT_APP_DATABASE_URL || '';
+const supabaseKey = process.env.REACT_APP_DATABASE_KEY || '';
+if (!supabaseUrl || !supabaseKey) {
+  console.error('supabaseUrl or supabaseKey is empty !!!', process.env.REACT_APP_DATABASE_URL, process.env.REACT_APP_DATABASE_KEY);
+}
+// const supabaseBucket = "image"
 const supabase = createClient(
   supabaseUrl,
   supabaseKey);
-
-let FIREBASE_CONFIG: Record<string, any>;
-try {
-  FIREBASE_CONFIG = JSON.parse(process.env.REACT_APP_FIREBASE_CONFIG);
-} catch (error: any) {
-  console.warn(
-    `Error JSON parsing firebase config. Supplied value: ${process.env.REACT_APP_FIREBASE_CONFIG}`,
-  );
-  FIREBASE_CONFIG = {};
-}
-
-let firebasePromise: Promise<typeof import("firebase/app").default> | null =
-  null;
-let firestorePromise: Promise<any> | null | true = null;
-let firebaseStoragePromise: Promise<any> | null | true = null;
-
-let isFirebaseInitialized = false;
-
-const _loadFirebase = async () => {
-  const firebase = (
-    await import(/* webpackChunkName: "firebase" */ "firebase/app")
-  ).default;
-
-  if (!isFirebaseInitialized) {
-    try {
-      firebase.initializeApp(FIREBASE_CONFIG);
-    } catch (error: any) {
-      // trying initialize again throws. Usually this is harmless, and happens
-      // mainly in dev (HMR)
-      if (error.code === "app/duplicate-app") {
-        console.warn(error.name, error.code);
-      } else {
-        throw error;
-      }
-    }
-    isFirebaseInitialized = true;
-  }
-
-  return firebase;
-};
-
-const _getFirebase = async (): Promise<
-  typeof import("firebase/app").default
-> => {
-  if (!firebasePromise) {
-    firebasePromise = _loadFirebase();
-  }
-  return firebasePromise;
-};
-
-// -----------------------------------------------------------------------------
-
-const loadFirestore = async () => {
-  const firebase = await _getFirebase();
-  if (!firestorePromise) {
-    firestorePromise = import(
-      /* webpackChunkName: "firestore" */ "firebase/firestore"
-      );
-  }
-  if (firestorePromise !== true) {
-    await firestorePromise;
-    firestorePromise = true;
-  }
-  return firebase;
-};
-
-export const loadFirebaseStorage = async () => {
-  const firebase = await _getFirebase();
-  if (!firebaseStoragePromise) {
-    firebaseStoragePromise = import(
-      /* webpackChunkName: "storage" */ "firebase/storage"
-      );
-  }
-  if (firebaseStoragePromise !== true) {
-    await firebaseStoragePromise;
-    firebaseStoragePromise = true;
-  }
-  return firebase;
-};
 
 class DatabaseSceneVersionCache {
   private static cache = new WeakMap<SocketIOClient.Socket, number>();
@@ -132,7 +55,7 @@ export const isSavedToDatabase = (
   return true;
 };
 
-export const saveFilesToFirebase = async ({
+export const saveFilesToDatabase = async ({
                                             prefix,
                                             files,
                                           }: {
@@ -150,7 +73,7 @@ export const saveFilesToFirebase = async ({
         // const supabase = createClient(
         //   supabaseUrl,
         //   supabaseKey);
-        await supabase.storage.from(supabaseBucket).upload(
+        await supabase.storage.from(DATABASE_STORAGE_PREFIXES.collabBucket).upload(
           `${prefix}/${id}`,
           new Blob([buffer], {
             type: MIME_TYPES.binary,
@@ -169,7 +92,7 @@ export const saveFilesToFirebase = async ({
   return {savedFiles, erroredFiles};
 };
 
-export const loadFilesFromFirebase = async (
+export const loadFilesFromDatabase = async (
   prefix: string,
   decryptionKey: string,
   filesIds: readonly FileId[],
@@ -181,10 +104,7 @@ export const loadFilesFromFirebase = async (
     [...new Set(filesIds)].map(async (id) => {
       try {
 
-        // const supabase = createClient(
-        //   supabaseUrl,
-        //   supabaseKey);
-        const url = `${supabaseUrl}/storage/v1/object/${supabaseBucket}/${prefix}/${id}`
+        const url = `${supabaseUrl}/storage/v1/object/${DATABASE_STORAGE_PREFIXES.collabBucket}/${prefix}/${id}`
         // console.log('url', url)
         const response = await fetch(url, {
           headers: {
@@ -223,12 +143,6 @@ export const loadFilesFromFirebase = async (
   return {loadedFiles, erroredFiles};
 };
 
-interface FirebaseStoredScene {
-  sceneVersion: number;
-  iv: firebase.default.firestore.Blob;
-  ciphertext: firebase.default.firestore.Blob;
-}
-
 const encryptElements = async (
   key: string,
   elements: readonly ExcalidrawElement[],
@@ -246,30 +160,11 @@ const decryptElements = async (
   iv: Uint8Array,
   roomKey: string,
 ): Promise<readonly ExcalidrawElement[]> => {
-  // const ciphertext = data.ciphertext.toUint8Array();
-  // const iv = data.iv.toUint8Array();
-
   const decrypted = await decryptData(iv, ciphertext, roomKey);
   const decodedData = new TextDecoder("utf-8").decode(
     new Uint8Array(decrypted),
   );
   return JSON.parse(decodedData);
-};
-
-const createFirebaseSceneDocument = async (
-  firebase: ResolutionType<typeof loadFirestore>,
-  elements: readonly SyncableExcalidrawElement[],
-  roomKey: string,
-) => {
-  const sceneVersion = getSceneVersion(elements);
-  const {ciphertext, iv} = await encryptElements(roomKey, elements);
-  return {
-    sceneVersion,
-    ciphertext: firebase.firestore.Blob.fromUint8Array(
-      new Uint8Array(ciphertext),
-    ),
-    iv: firebase.firestore.Blob.fromUint8Array(iv),
-  } as FirebaseStoredScene;
 };
 
 const createDatabaseSceneDocument = async (
@@ -384,7 +279,7 @@ export const saveToDatabase = async (
   return {reconciledElements: savedData.reconciledElements};
 };
 
-export const loadFromFirebase = async (
+export const loadFromDatabase = async (
   roomId: string,
   roomKey: string,
   socket: SocketIOClient.Socket | null,
