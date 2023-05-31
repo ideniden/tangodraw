@@ -7,7 +7,7 @@ import {ErrorDialog} from "../components/ErrorDialog";
 import {TopErrorBoundary} from "../components/TopErrorBoundary";
 import {
   APP_NAME,
-  EVENT,
+  EVENT, MIME_TYPES,
   THEME,
   TITLE_TIMEOUT,
   VERSION_TIMEOUT,
@@ -31,7 +31,7 @@ import {
   LibraryItems,
   ExcalidrawImperativeAPI,
   BinaryFiles,
-  ExcalidrawInitialDataState,
+  ExcalidrawInitialDataState, BinaryFileData,
 } from "../types";
 import {
   debounce,
@@ -87,6 +87,9 @@ import "./index.scss";
 import {ResolutionType} from "../utility-types";
 
 import VConsole from "vconsole";
+import {base64ToString} from "../data/encode";
+
+console.log('Version: 202305312209')
 
 let vconsole = null;
 
@@ -357,8 +360,56 @@ const ExcalidrawWrapper = () => {
       }
     };
 
+    const loadImageByUrl = (imageUrl: string) => {
+
+      const imageId = imageUrl;
+
+      const response = fetch(imageUrl);
+      // @ts-ignore
+      const imageData = response.blob();
+      const reader = new FileReader();
+      reader.readAsDataURL(imageData);
+      reader.onload = () => {
+        const imagesArray: BinaryFileData[] = [
+          {
+            id: imageId as BinaryFileData["id"],
+            dataURL: reader.result as BinaryFileData["dataURL"],
+            mimeType: MIME_TYPES.binary,
+            created: Date.now(),
+            lastRetrieved: Date.now(),
+          }
+        ];
+
+        excalidrawAPI.addFiles(imagesArray);
+
+        excalidrawAPI.updateScene({
+          elements: excalidrawAPI.getSceneElementsIncludingDeleted().map((element) => {
+            return element
+          }),
+        });
+
+      };
+    }
+
     initializeScene({collabAPI, excalidrawAPI}).then(async (data) => {
+      console.log('initializeScene data -> ', data);
       loadImages(data, /* isInitialLoad */ true);
+
+      //parse url parameters
+      const urlParams = new URLSearchParams(window.location.search);
+      let imagesParams = urlParams.get('images');
+      //decode imagesParams by url encoder
+      if (imagesParams) {
+        imagesParams = decodeURIComponent(imagesParams);
+        imagesParams.split(',').forEach((image) => {
+          try {
+            loadImageByUrl(image);
+          } catch (e) {
+            console.error('loadImageByUrl error -> ', e);
+          }
+        });
+      }
+
       initialStatePromiseRef.current.promise.resolve(data.scene);
     });
 
