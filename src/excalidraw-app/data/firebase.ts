@@ -290,15 +290,27 @@ export const loadFromDatabase = async (
     .select('document')
     .eq('room_id', roomId);
 
-  console.log('从协作服务器加载场景信息 -> ', data)
+  console.log('从协作服务器加载场景信息 -> ', data, data.data?.length)
 
-  const document = data.data?.[0].document
-  const elements = getSyncableElements(
-    await decryptElements(
-      new Uint8Array(document.ciphertext),
-      new Uint8Array(document.iv),
-      roomKey),
-  );
+  let elements: SyncableExcalidrawElement[] = [];
+
+  if (data.data && data.data.length > 0) {
+    const document = data.data?.[0].document
+    elements = getSyncableElements(
+      await decryptElements(
+        new Uint8Array(document.ciphertext),
+        new Uint8Array(document.iv),
+        roomKey),
+    );
+  } else {
+    console.log('初次进入房间，创建场景信息 -> ', roomId)
+  }
+  // const elements = getSyncableElements(
+  //   await decryptElements(
+  //     new Uint8Array(document.ciphertext),
+  //     new Uint8Array(document.iv),
+  //     roomKey),
+  // );
 
   if (socket) {
     DatabaseSceneVersionCache.set(socket, elements);

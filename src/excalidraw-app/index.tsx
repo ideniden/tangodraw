@@ -89,7 +89,7 @@ import {ResolutionType} from "../utility-types";
 import VConsole from "vconsole";
 import {base64ToString} from "../data/encode";
 
-console.log('Version: 202305312209')
+console.log('Version: 2023_0601_1511')
 
 let vconsole = null;
 
@@ -360,13 +360,41 @@ const ExcalidrawWrapper = () => {
       }
     };
 
-    const loadImageByUrl = (imageUrl: string) => {
+    const loadImageByUrl = async ({elements, imageUrl}: { elements: any, imageUrl: string }) => {
 
       const imageId = imageUrl;
 
-      const response = fetch(imageUrl);
+      elements.push({
+        fileId: imageId,
+        type: "image",
+        x: 300,
+        y: -300,
+        width: 250,
+        height: 250,
+        angle: 0,
+        strokeColor: "transparent",
+        backgroundColor: "transparent",
+        fillStyle: "hachure",
+        strokeWidth: 1,
+        strokeStyle: "solid",
+        roughness: 1,
+        opacity: 100,
+        groupIds: [],
+        strokeSharpness: "round",
+        seed: 707269846,
+        version: 143,
+        versionNonce: 2028982666,
+        isDeleted: false,
+        boundElements: null,
+        updated: 1644914782403,
+        link: null,
+        status: "pending",
+        scale: [1, 1]
+      })
+
+      const response = await fetch(imageUrl);
       // @ts-ignore
-      const imageData = response.blob();
+      const imageData = await response.blob();
       const reader = new FileReader();
       reader.readAsDataURL(imageData);
       reader.onload = () => {
@@ -374,7 +402,7 @@ const ExcalidrawWrapper = () => {
           {
             id: imageId as BinaryFileData["id"],
             dataURL: reader.result as BinaryFileData["dataURL"],
-            mimeType: MIME_TYPES.binary,
+            mimeType: MIME_TYPES.png,
             created: Date.now(),
             lastRetrieved: Date.now(),
           }
@@ -392,9 +420,7 @@ const ExcalidrawWrapper = () => {
     }
 
     initializeScene({collabAPI, excalidrawAPI}).then(async (data) => {
-      console.log('initializeScene data -> ', data);
       loadImages(data, /* isInitialLoad */ true);
-
       //parse url parameters
       const urlParams = new URLSearchParams(window.location.search);
       let imagesParams = urlParams.get('images');
@@ -403,13 +429,21 @@ const ExcalidrawWrapper = () => {
         imagesParams = decodeURIComponent(imagesParams);
         imagesParams.split(',').forEach((image) => {
           try {
-            loadImageByUrl(image);
+            loadImageByUrl({
+              elements: data.scene?.elements,
+              imageUrl: image
+            }).then(r => console.log('loadImageByUrl -> ', r));
           } catch (e) {
             console.error('loadImageByUrl error -> ', e);
           }
         });
       }
+      // loadImageByUrl({
+      //   elements: data.scene?.elements,
+      //   imageUrl: 'https://hrst.lssvc.cn/res/img/logo_lss.png'
+      // }).then(r => console.log('loadImageByUrl -> ', r));
 
+      console.log('initializeScene data -> ', data);
       initialStatePromiseRef.current.promise.resolve(data.scene);
     });
 
