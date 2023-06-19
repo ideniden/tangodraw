@@ -89,7 +89,8 @@ import {ResolutionType} from "../utility-types";
 import VConsole from "vconsole";
 import {base64ToString} from "../data/encode";
 
-console.log('Version: 2023_0601_1511')
+const tangoDrawVersion = '20230619';
+console.log(`Version: ${tangoDrawVersion}`);
 
 let vconsole = null;
 
